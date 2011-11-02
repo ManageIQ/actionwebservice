@@ -63,18 +63,18 @@ module ActionWebService # :nodoc:
               end
               log_request(ws_request, request.raw_post)
               if exception
-                log_error(exception) unless logger.nil?
+                Rails.logger.error(exception) unless logger.nil?
                 send_web_service_error_response(ws_request, exception)
               else
                 send_web_service_response(ws_response, bm.real)
               end
             else
               exception ||= DispatcherError.new("Malformed SOAP or XML-RPC protocol message")
-              log_error(exception) unless logger.nil?
+              Rails.logger.error(exception) unless logger.nil?
               send_web_service_error_response(ws_request, exception)
             end
           rescue Exception => e
-            log_error(e) unless logger.nil?
+            Rails.logger.error(e) unless logger.nil?
             send_web_service_error_response(ws_request, e)
           end
 
@@ -155,7 +155,7 @@ module ActionWebService # :nodoc:
               options = { :type => 'text/xml', :disposition => 'inline' }
               send_data(to_wsdl, options)
             rescue Exception => e
-              log_error(e) unless logger.nil?
+              Rails.logger.error(e) unless logger.nil?
             end
           elsif request.post?
             render :status => 500, :text => 'POST not supported'
@@ -165,7 +165,7 @@ module ActionWebService # :nodoc:
         private
           def base_uri
             host = request.host_with_port
-            relative_url_root = ::ActionController::Base.relative_url_root
+            relative_url_root = self.config.relative_url_root
             scheme = request.ssl? ? 'https' : 'http'
             '%s://%s%s/%s/' % [scheme, host, relative_url_root, self.class.controller_path]
           end
@@ -183,7 +183,7 @@ module ActionWebService # :nodoc:
             case dispatching_mode
             when :direct
               api = self.class.web_service_api
-              web_service_name = controller_class_name.sub(/Controller$/, '').underscore
+              web_service_name = self.class.name.sub(/Controller$/, '').underscore
               apis[web_service_name] = [api, register_api(api, marshaler)]
             when :delegated, :layered
               self.class.web_services.each do |web_service_name, info|

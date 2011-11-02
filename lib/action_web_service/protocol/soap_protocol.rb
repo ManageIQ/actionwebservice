@@ -155,8 +155,21 @@ module ActionWebService # :nodoc:
             soap_action.gsub!(/^"/, '')
             soap_action.gsub!(/"$/, '')
             soap_action.strip!
+            soap_action = get_action_from_envelope(request.env["RAW_POST_DATA"]) if soap_action.empty?
             return nil if soap_action.empty?
             soap_action
+          end
+
+          # Allow for consumers that do not send the method name in the
+          # HTTP_SOAPACTION http header. In this mode the method name is in the
+          # XML tag under Envelope/Body in the Soap request.  Without this
+          # change, Rails is unable to determine the method name unless it's
+          # provided in HTTP_SOAPACTION.
+          # TODO: Find out which clients do this and comment them here.
+          def get_action_from_envelope(data)
+            require 'nokogiri'
+            node = Nokogiri.XML(data).xpath("/*[local-name()='Envelope']/*[local-name()='Body']/*[1]").first
+            (node.nil? || node.name.nil?) ? "" : node.name.strip
           end
 
           def create_soap_envelope(body)
