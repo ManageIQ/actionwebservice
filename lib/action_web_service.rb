@@ -22,15 +22,19 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #++
 
+
 begin
-  require 'active_support'
-  require 'action_controller'
-  require 'active_record'
+  require 'activesupport'
+  require 'actioncontroller'
+  require 'activerecord'
+  require 'actionpack'
+  require 'active_support/core_ext/class/inheritable_attributes'
+  require 'action_dispatch/routing'
 rescue LoadError
   require 'rubygems'
-  gem 'activesupport'
-  gem 'actionpack'
-  gem 'activerecord'
+  gem 'activesupport', '>=3.0.5'
+  gem 'actionpack'   , '>=3.0.5'
+  gem 'activerecord' , '>=3.0.5'
 end
 
 $:.unshift(File.dirname(__FILE__) + "/action_web_service/vendor/")

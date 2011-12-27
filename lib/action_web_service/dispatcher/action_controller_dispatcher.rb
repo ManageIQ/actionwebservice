@@ -150,15 +150,14 @@ module ActionWebService # :nodoc:
         SoapHttpTransport = 'http://schemas.xmlsoap.org/soap/http'
 
         def wsdl
-          case request.method
-          when :get
+          if request.get?
             begin
               options = { :type => 'text/xml', :disposition => 'inline' }
               send_data(to_wsdl, options)
             rescue Exception => e
               log_error(e) unless logger.nil?
             end
-          when :post
+          elsif request.post?
             render :status => 500, :text => 'POST not supported'
           end
         end

@@ -59,7 +59,9 @@ module ActionWebService # :nodoc:
           end
           request = envelope.body.request
           method_name = request.elename.name
-          params = request.collect{ |k, v| marshaler.soap_to_ruby(request[k]) }
+          params = {}
+          request.each {|k,v| params[k] = marshaler.soap_to_ruby(v) }
+
           Request.new(self, method_name, params, service_name, nil, nil, protocol_options)
         end
 
@@ -146,7 +148,7 @@ module ActionWebService # :nodoc:
 
         private
           def has_valid_soap_action?(request)
-            return nil unless request.method == :post
+            return nil unless request.post?
             soap_action = request.env['HTTP_SOAPACTION']
             return nil unless soap_action
             soap_action = soap_action.dup
