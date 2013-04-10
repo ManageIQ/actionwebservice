@@ -35,9 +35,11 @@ module ActionWebService # :nodoc:
       # Disallow instantiation
       private_class_method :new, :allocate
       
+      class_attribute :api_methods_attr, :api_public_method_names_attr, :default_api_method_instance_attr
+      self.api_methods_attr = self.api_public_method_names_attr = {}
+
       class << self
         include ActionWebService::SignatureTypes
-
         # API methods have a +name+, which must be the Ruby method name to use when
         # performing the invocation on the web service object.
         #
@@ -90,8 +92,8 @@ module ActionWebService # :nodoc:
           name = name.to_sym
           public_name = public_api_method_name(name)
           method = Method.new(name, public_name, expects, returns)
-          write_inheritable_hash("api_methods", name => method)
-          write_inheritable_hash("api_public_method_names", public_name => name)
+          self.api_methods_attr = self.api_methods_attr.merge({ name => method })
+          self.api_public_method_names_attr = self.api_public_method_names_attr.merge({ public_name => name })
         end
 
         # Whether the given method name is a service method on this API
@@ -103,7 +105,7 @@ module ActionWebService # :nodoc:
         #   ProjectsApi.has_api_method?('GetCount')   #=> false
         #   ProjectsApi.has_api_method?(:getCount)    #=> true
         def has_api_method?(name)
-          api_methods.has_key?(name)
+          self.api_methods_attr.has_key?(name)
         end
   
         # Whether the given public method name has a corresponding service method
@@ -116,7 +118,7 @@ module ActionWebService # :nodoc:
         #   ProjectsApi.has_api_method?(:getCount)    #=> false
         #   ProjectsApi.has_api_method?('GetCount')   #=> true
         def has_public_api_method?(public_name)
-          api_public_method_names.has_key?(public_name)
+          self.api_public_method_names_attr.has_key?(public_name)
         end
   
         # The corresponding public method name for the given service method name
@@ -139,7 +141,7 @@ module ActionWebService # :nodoc:
         #        
         #   ProjectsApi.api_method_name('GetCount') #=> :getCount
         def api_method_name(public_name)
-          api_public_method_names[public_name]
+          self.api_public_method_names_attr[public_name]
         end
   
         # A Hash containing all service methods on this API, and their
@@ -155,7 +157,7 @@ module ActionWebService # :nodoc:
         #      :getCompletedCount=>#<ActionWebService::API::Method:0x2437794 ...>}
         #   ProjectsApi.api_methods[:getCount].public_name #=> "GetCount"
         def api_methods
-          read_inheritable_attribute("api_methods") || {}
+          self.api_methods_attr
         end
 
         # The Method instance for the given public API method name, if any
@@ -187,18 +189,18 @@ module ActionWebService # :nodoc:
         # The Method instance for the default API method, if any
         def default_api_method_instance
           return nil unless name = default_api_method
-          instance = read_inheritable_attribute("default_api_method_instance")
+          instance = self.default_api_method_instance_attr
           if instance && instance.name == name
             return instance
           end
           instance = Method.new(name, public_api_method_name(name), nil, nil)
-          write_inheritable_attribute("default_api_method_instance", instance)
+          self.default_api_method_instance_attr = instance
           instance
         end
 
         private
           def api_public_method_names
-            read_inheritable_attribute("api_public_method_names") || {}
+            self.api_public_method_names_attr || {}
           end
   
           def validate_options(valid_option_keys, supplied_option_keys)

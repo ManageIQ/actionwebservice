@@ -14,9 +14,9 @@ Gem::Specification.new do |s|
   s.email = "rubyjedi@gmail.com, bitserf@gmail.com, ksibilev@yahoo.com"
   s.homepage = "http://wiki.github.com/rubyjedi/actionwebservice/"
 
-  s.add_dependency('activesupport', '~> 3.1')
-  s.add_dependency('actionpack',    '~> 3.1')
-  s.add_dependency('activerecord',  '~> 3.1')
+  s.add_dependency('activesupport', '>= 3.1')
+  s.add_dependency('actionpack',    '>= 3.1')
+  s.add_dependency('activerecord',  '>= 3.1')
 
   s.has_rdoc = true
   s.requirements << 'none'
