@@ -1,3 +1,8 @@
+# Change Log
+
+All notable changes to this project will be documented in this file.
+
+
 *2.3.5*
 
 * Added support for sqlite3 in testing [Steve Weet]
